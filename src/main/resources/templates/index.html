@@ -1,11 +1,26 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org" xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
 <head>
-    <title>Spring Security Example</title>
+    <meta charset="UTF-8">
+    <title></title>
 </head>
 <body>
-<h1>Welcome to Index PAGE!</h1>
+<div>
+    <th:block th:each="msg : ${messages}">
+        <h1 th:text="${msg}"></h1>
+    </th:block>
+</div>
+<br><br><br>
+<hr>
 
+<br><br>
+<div sec:authorize="hasRole('ROLE_ADMIN')">
+    Text visible to admin
+    <a href="/admin">Go to users page</a>
+</div>
+<br>
+<a href="/login">Go to Login page</a>
 
 </body>
 </html>
