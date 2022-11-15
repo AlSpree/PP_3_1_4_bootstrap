@@ -6,12 +6,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import ru.kata.spring.boot_security.demo.models.Role;
 import ru.kata.spring.boot_security.demo.models.User;
 import ru.kata.spring.boot_security.demo.services.UserServiceImpl;
 
-import javax.validation.Valid;
+
 
 
 @Controller
@@ -27,60 +27,40 @@ public class UserController {
 
     @GetMapping("/admin")
     public String index(Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        model.addAttribute("admin", userServiceImpl.findUserByName(authentication.getName()));
         model.addAttribute("users", userServiceImpl.findAll());
-        return "show-all";
+        model.addAttribute("newUser", new User());
+        model.addAttribute("newRole", new Role());
+        model.addAttribute("currentUser", userServiceImpl.findUserByName(authentication.getName()));
+        model.addAttribute("allRoles", userServiceImpl.getRoleList());
+
+        return "show-all_bootstrap";
     }
 
     @GetMapping("/user")
     public String indexUser(Model model) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         model.addAttribute("foundIdUser", userServiceImpl.getUser(authentication.getName()));
-        return "/user-info";
-    }
-
-
-    @GetMapping("/admin/users/{id}")
-    public String showUser(@PathVariable("id") int id, Model model) {
-        User ourUser = userServiceImpl.findUser(id);
-        model.addAttribute("foundIdUser", ourUser);
-        return "user-info";
-    }
-
-    @GetMapping("/admin/new")
-    public String newUser(@ModelAttribute("newUser") User user) {
-        return "create";
+        return "/user-info_bootstrap";
     }
 
     @PostMapping("/admin")
-    public String create(@ModelAttribute("newUser") @Valid User user, BindingResult bindingResult) {
-        if(bindingResult.hasErrors()) {
-            return "create";
-        }
-        userServiceImpl.saveUser(user);
+    public String create(@ModelAttribute("newUser") User user,
+                         @ModelAttribute("newRole") Role role) {
+
+        userServiceImpl.saveNewUser(user, role.getRole());
         return "redirect:/admin";
     }
 
-
-
-    @GetMapping("/admin/{id}/edit")
-    public String edit(Model model, @PathVariable("id") int id) {
-        model.addAttribute("userUpdate", userServiceImpl.findUser(id));
-        System.out.println(userServiceImpl.findUser(id));
-        return "edit";
-    }
 
     @PatchMapping("/admin/{id}")
-    public String update(@ModelAttribute("userUpdate") @Valid User user, BindingResult bindingResult, @PathVariable("id") int id) {
-        System.out.println(user);
+    public String update(@ModelAttribute("roleUpdate") Role role,
+                         @ModelAttribute("userUpdate") User user, @PathVariable("id") int id) {
 
-        if(bindingResult.hasErrors()) {
-            return "edit";
-        }
-
-        userServiceImpl.updateUser(id, user);
+        userServiceImpl.updateUser(user, role.getRole());
         return "redirect:/admin";
     }
-
 
 
     @DeleteMapping("/admin/{id}")

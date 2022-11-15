@@ -11,10 +11,8 @@ public class Role implements GrantedAuthority {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="id")
     private int id;
 
-    @Column(name="role")
     private String role;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -27,6 +25,11 @@ public class Role implements GrantedAuthority {
 
     public Role(String role) {
         this.role = role;
+    }
+
+    public Role(String role, User user) {
+        this.role = role;
+        this.user = user;
     }
 
     public int getId() {
@@ -55,10 +58,7 @@ public class Role implements GrantedAuthority {
 
     @Override
     public String toString() {
-        return "Role{" +
-                "id=" + id +
-                ", role='" + role + '\'' +
-                '}';
+        return role;
     }
 
     @Override

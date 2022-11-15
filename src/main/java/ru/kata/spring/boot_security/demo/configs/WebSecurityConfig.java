@@ -14,7 +14,6 @@ import ru.kata.spring.boot_security.demo.services.UserServiceImpl;
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private final SuccessUserHandler successUserHandler;
     private final PasswordEncoderService passwordEncoder;
-
     private final UserServiceImpl userService;
 
     @Autowired
@@ -29,14 +28,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http
                 .authorizeRequests()
                 .antMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
-                .antMatchers("/user/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
-                .antMatchers("/").permitAll()
+                .antMatchers("/user").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+                .antMatchers("/","/error").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .formLogin().successHandler(successUserHandler)
                 .permitAll()
                 .and()
-                .logout().logoutUrl("/logout").logoutSuccessUrl("/login")
+                .logout().logoutUrl("/logout").logoutSuccessUrl("/")
                 .permitAll();
     }
 
@@ -49,19 +48,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         return authenticationProvider;
     }
 
-    // аутентификация inMemory
-//    @Bean
-//    @Override
-//    public UserDetailsService userDetailsService() {
-//        UserDetails user =
-//                User.withDefaultPasswordEncoder()
-//                        .username("user")
-//                        .password("user")
-//                        .roles("USER")
-//                        .build();
-//
-//        return new InMemoryUserDetailsManager(user);
-//    }
 
 
 }
