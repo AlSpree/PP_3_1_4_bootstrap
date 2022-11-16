@@ -7,56 +7,53 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.kata.spring.boot_security.demo.models.Role;
 import ru.kata.spring.boot_security.demo.models.User;
+import ru.kata.spring.boot_security.demo.repositories.RoleRepository;
 import ru.kata.spring.boot_security.demo.repositories.UserRepository;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Service
 public class DefaultUsersAdd {
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
 
 
     @Autowired
-    public DefaultUsersAdd(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public DefaultUsersAdd(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
     @Bean
     @Transactional
     public void defaultUsers () {
-        List<Role> rolesAdmin = new ArrayList<>();
+        Set<Role> rolesAdmin = new HashSet<>();
         Role adminRole = new Role("ROLE_ADMIN");
         User adminUser = new User("admin", "admin_surname", 35, "HR", passwordEncoder.encode("admin"));
 
         rolesAdmin.add(adminRole);
-        adminRole.setUser(adminUser);
         adminUser.setRoles(rolesAdmin);
+        roleRepository.save(adminRole);
         userRepository.save(adminUser);
 
 
-        List<Role> rolesUser = new ArrayList<>();
+        Set<Role> rolesUser = new HashSet<>();
         Role userRole = new Role("ROLE_USER");
         User userUser = new User("user", "user_surname", 40, "IT",passwordEncoder.encode("user"));
 
         rolesUser.add(userRole);
-        userRole.setUser(userUser);
         userUser.setRoles(rolesUser);
+        roleRepository.save(userRole);
         userRepository.save(userUser);
 
-        List<Role> rolesCombo = new ArrayList<>();
-        Role adminRoleCombo = new Role("ROLE_ADMIN");
-        Role userRoleCombo = new Role("ROLE_USER");
+        Set<Role> rolesCombo = new HashSet<>();
         User userCombo = new User("combo", "combo_surname", 10, "Sales",passwordEncoder.encode("combo"));
-        adminRoleCombo.setUser(userCombo);
-        userRoleCombo.setUser(userCombo);
-        rolesCombo.add(adminRoleCombo);
-        rolesCombo.add(userRoleCombo);
+        rolesCombo.add(userRole);
+        rolesCombo.add(adminRole);
         userCombo.setRoles(rolesCombo);
         userRepository.save(userCombo);
-
     }
-
 }

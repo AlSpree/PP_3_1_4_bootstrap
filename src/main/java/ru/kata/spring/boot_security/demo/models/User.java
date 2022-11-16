@@ -5,9 +5,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 @Entity
 @Table(name="users_bs")
@@ -39,8 +37,11 @@ public class User implements UserDetails {
 //    @NonNull
     private String password;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user", cascade = CascadeType.ALL)
-    private List<Role> roles;
+    @ManyToMany
+    @JoinTable(name="users_roles",
+    joinColumns = @JoinColumn(name="user_id"),
+    inverseJoinColumns = @JoinColumn(name="role_id"))
+    private Set<Role> roles;
 
     public User() {
     }
@@ -97,25 +98,22 @@ public class User implements UserDetails {
         this.password = password;
     }
 
-    public List<Role> getRoles() {
+    public Set<Role> getRoles() {
         return roles;
     }
 
-    public List<String> getRolesName() {
-        List<String> roleNames = new ArrayList<>();
+    public Set<String> getRolesName() {
+        Set<String> roleNames = new HashSet<>();
         for (Role role: roles) {
             roleNames.add(role.getRole());
         }
         return roleNames;
     }
 
-    public void setRoles(List<Role> roles) {
+    public void setRoles(Set<Role> roles) {
         this.roles = roles;
     }
 
-    public void setRolesList(List<Role> roles) {
-        this.roles = roles;
-    }
 
     @Override
     public String toString() {

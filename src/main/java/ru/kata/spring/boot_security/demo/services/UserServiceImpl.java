@@ -13,9 +13,7 @@ import ru.kata.spring.boot_security.demo.models.User;
 import ru.kata.spring.boot_security.demo.repositories.RoleRepository;
 import ru.kata.spring.boot_security.demo.repositories.UserRepository;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 
 @Service
@@ -48,12 +46,23 @@ public class UserServiceImpl implements UserDetailsService {
 
     @Transactional
     public void saveNewUser(User user, String role) {
-        List<Role> roles = new ArrayList<>();
+        Set<Role> roles = new HashSet<>();
         if(role==null) {
-            role = "ROLE_NONE";
+            if(roleRepository.findRoleByRole("ROLE_USER").orElse(null)==null) {
+//                System.out.println("findRoleByRole(-ROLE_USER-) is null");
+                roleRepository.save(new Role("ROLE_USER"));
+                roles.add(roleRepository.findRoleByRole("ROLE_USER").get());
+            } else {
+                Role newRole = roleRepository.findRoleByRole("ROLE_USER").get();
+                roles.add(newRole);
+            }
+        } else {
+            if(roleRepository.findRoleByRole(role).orElse(null)==null) {
+//                System.out.println("findRoleByRole(-role-) is null");
+                roleRepository.save(new Role(role));
+            }
+            roles.add(roleRepository.findRoleByRole(role).get());
         }
-        Role newRole = new Role(role, user);
-        roles.add(newRole);
         user.setRoles(roles);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
@@ -62,28 +71,14 @@ public class UserServiceImpl implements UserDetailsService {
 
     @Transactional
     public void updateUser(User userUpdate, String roleUpdate) {
-        List<Role> roles = new ArrayList<>();
-        User foundUser = userRepository.findUserByName(userUpdate.getName()).get();
+        User foundUser = userRepository.findUserById(userUpdate.getId()).get();
+        Set<Role> roles = new HashSet<>();
 
         if (roleUpdate == null) {
-            if (!foundUser.getRolesName().contains("ROLE_NONE")) {
-                System.out.println("getRolesName().contains(ROLE_NONE)");
-                List<Role> roles1 = foundUser.getRoles();
-                for (Role role : roles1) {
-                    System.out.println(role.getId());
-                    roleRepository.deleteById(role.getId());
-                }
-                roles.add(new Role("ROLE_NONE", userUpdate));
-                userUpdate.setRoles(roles);
-            }
-        } else {
-//            System.out.println("выбран ROLE_ADMIN или ROLE_USER");
-            List<Role> roles1 = foundUser.getRoles();
-            for (Role role : roles1) {
-                System.out.println(role.getId());
-                roleRepository.deleteById(role.getId());
-            }
-            roles.add(new Role(roleUpdate, userUpdate));
+            roles = foundUser.getRoles();
+            userUpdate.setRoles(roles);
+            } else {
+            roles.add(roleRepository.findRoleByRole(roleUpdate).get());
             userUpdate.setRoles(roles);
         }
         userUpdate.setPassword(passwordEncoder.encode(userUpdate.getPassword()));
@@ -95,8 +90,6 @@ public class UserServiceImpl implements UserDetailsService {
     public void delete(int id) {
         userRepository.deleteById(id);
     }
-
-
 
 
     @Override

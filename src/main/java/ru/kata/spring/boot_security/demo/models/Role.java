@@ -15,10 +15,6 @@ public class Role implements GrantedAuthority {
 
     private String role;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="user_id", referencedColumnName = "id")
-    private User user;
-
 
     public Role() {
     }
@@ -27,10 +23,6 @@ public class Role implements GrantedAuthority {
         this.role = role;
     }
 
-    public Role(String role, User user) {
-        this.role = role;
-        this.user = user;
-    }
 
     public int getId() {
         return id;
@@ -48,13 +40,6 @@ public class Role implements GrantedAuthority {
         this.role = role;
     }
 
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
 
     @Override
     public String toString() {
