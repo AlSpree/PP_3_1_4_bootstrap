@@ -15,7 +15,7 @@ public class HelloController {
 		List<String> messages = new ArrayList<>();
 		messages.add("Hello!");
 		messages.add("It's start page for PP task #3.1.4");
-		messages.add("1.00 version by november'15");
+		messages.add("1.01 version by november'16");
 		model.addAttribute("messages", messages);
 		return "index";
 	}
